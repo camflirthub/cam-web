@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CamFlirtHub — Random Video Chats</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent1:#ff6aa3;
+      --accent2:#ff2f85;
+      --muted:#98a0b0;
+      --glass: rgba(255,255,255,0.03);
+      --radius:16px;
+      --shadow: 0 10px 30px rgba(2,6,23,0.6);
+      --glass-border: rgba(255,255,255,0.04);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg) 0%, #08101a 100%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:30px;
+    }
+
+    /* Container */
+    .wrap{
+      width:100%;
+      max-width:1100px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:20px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:0;
+      min-height:640px;
+    }
+
+    /* Left panel (content) */
+    .left{
+      padding:48px;
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+      justify-content:center;
+    }
+
+    /* Logo */
+    .logo {
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .logo svg{width:56px;height:56px;flex-shrink:0}
+    .brand { line-height:1; }
+    .brand .title{ font-size:22px; font-weight:700; letter-spacing:0.6px; }
+    .brand .subtitle{ font-size:12px; color:var(--muted); letter-spacing:0.3px; }
+
+    h1{
+      margin:0;
+      font-size:38px;
+      line-height:1.02;
+      letter-spacing:-0.5px;
+      filter: drop-shadow(0 6px 20px rgba(255,42,120,0.08));
+      background: linear-gradient(90deg,var(--accent1), var(--accent2));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+    }
+
+    p.lead { margin:0; color:var(--muted); max-width:60ch; }
+
+    /* CTA / Buttons */
+    .ctas{ display:flex; gap:12px; margin-top:8px; flex-wrap:wrap; }
+    .btn{
+      border:0;
+      padding:14px 20px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:15px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      transition: transform .14s ease, box-shadow .14s ease;
+      user-select:none;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      color:white;
+      box-shadow: 0 8px 30px rgba(255,45,120,0.14);
+    }
+    .btn-ghost{
+      background:transparent;
+      color:var(--accent1);
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:none;
+    }
+
+    /* Right panel: imagery / preview */
+    .right {
+      padding:32px;
+      background:
+        radial-gradient(600px 300px at 10% 10%, rgba(255,106,163,0.06), transparent 10%),
+        linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+    }
+
+    .preview {
+      width:100%;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;
+      padding:18px;
+      border:1px solid var(--glass-border);
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .preview img{
+      width:110px;
+      height:110px;
+      object-fit:cover;
+      border-radius:12px;
+      box-shadow: 0 6px 20px rgba(2,6,23,0.6);
+      transform:translateY(0);
+      transition: transform .25s ease;
+    }
+    .preview img:hover{transform:translateY(-8px) rotate(-1deg)}
+
+    .feat-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:8px;
+      width:100%;
+    }
+    .pill{
+      background:var(--glass);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+
+    /* Gender modal (center overlay) */
+    .overlay{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(3,6,12,0.55);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .28s ease;
+      z-index:60;
+    }
+    .overlay.show{ opacity:1; pointer-events:auto; }
+    .gender-card{
+      width:96%;
+      max-width:780px;
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--glass-border);
+      padding:22px;
+      box-shadow: 0 20px 60px rgba(2,6,23,0.7);
+      transform: translateY(18px) scale(.98);
+      transition: transform .26s cubic-bezier(.2,.9,.2,1);
+    }
+    .overlay.show .gender-card{ transform: translateY(0) scale(1) }
+
+    .modal-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+    .modal-head h3{margin:0;font-size:20px}
+    .modal-desc{color:var(--muted);font-size:14px;margin-bottom:16px}
+
+    .genders{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
+    .gender-tile{
+      width:220px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border-radius:12px;
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,0.02);
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s;
+    }
+    .gender-tile:hover{transform:translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.6); border-color:rgba(255,255,255,0.04)}
+    .gender-tile svg{width:84px;height:84px;display:block}
+    .gender-label{font-weight:700; color:var(--muted); letter-spacing:0.3px}
+
+    .modal-foot{ margin-top:18px; display:flex; justify-content:center; gap:12px; color:var(--muted); font-size:13px; }
+
+    /* small helper */
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Footer small */
+    .legal{ font-size:12px; color:var(--muted); margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+    /* Animations */
+    .fade-in-up{animation:fadeUp .6s cubic-bezier(.2,.9,.2,1) both}
+    @keyframes fadeUp{ from{opacity:0; transform: translateY(10px)} to{opacity:1; transform: translateY(0)} }
+
+    /* Responsive */
+    @media (max-width:980px){
+      .wrap{grid-template-columns: 1fr; padding:20px;}
+      .right{order:-1;padding:24px}
+      .left{padding:28px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap fade-in-up" role="main" aria-labelledby="main-title">
+    <!-- LEFT: Copy + CTAs -->
+    <div class="left">
+      <div class="logo">
+        <!-- Custom inline SVG logo for CamFlirtHub.com -->
+        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#ff6aa3"/>
+              <stop offset="1" stop-color="#ff2f85"/>
+            </linearGradient>
+          </defs>
+          <rect width="160" height="160" rx="26" fill="url(#g1)"/>
+          <g transform="translate(22,28)" fill="#fff">
+            <path d="M18 10c6-6 38-6 44 0 6 6 6 38 0 44-6 6-38 6-44 0-6-6-6-38 0-44z" opacity="0.18"></path>
+            <circle cx="40" cy="32" r="10" fill="#fff"></circle>
+            <path d="M40 48c-12 0-20 6-24 10 6 6 22 12 36 12s30-6 36-12c-4-4-12-10-24-10H40z" opacity="0.12"></path>
+          </g>
+        </svg>
+
+        <div class="brand" aria-hidden="false">
+          <div class="title">CamFlirtHub.com</div>
+          <!-- REMOVED: "Powered by CooMeet" as requested -->
+          <div class="subtitle">Random video chats</div>
+        </div>
+      </div>
+
+      <h1 id="main-title">Instant random video chats — meet people worldwide</h1>
+
+      <p class="lead">Connect instantly with verified users. Free trial for new visitors. Choose your gender when you start.</p>
+
+      <div class="ctas" role="region" aria-label="Primary actions">
+        <button class="btn btn-primary" id="getTrial" aria-haspopup="dialog" title="Start free trial">🎉 Get a Free Trial</button>
+        <button class="btn btn-ghost" id="alreadyCustomer" title="Already a customer? Sign in">🔐 Already a customer? Click here</button>
+        <button class="btn btn-ghost" id="privacyBtn" title="Privacy & Terms" aria-controls="legal">📜 Privacy</button>
+      </div>
+
+      <div class="pill" style="margin-top:8px">No downloads • Secure • Anonymous option</div>
+
+      <div style="margin-top:22px; display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+        <div class="feat-grid">
+          <div class="pill">HD video & audio</div>
+          <div class="pill">Verified users</div>
+          <div class="pill">Global connections</div>
+          <div class="pill">Free trial available</div>
+        </div>
+      </div>
+
+      <div class="legal" id="legal" aria-hidden="true">
+        <span class="muted">© 2025 CamFlirtHub</span>
+        <span class="muted">•</span>
+        <a href="#privacy" style="color:var(--muted); text-decoration:none">Privacy Policy</a>
+        <span class="muted">•</span>
+        <a href="#terms" style="color:var(--muted); text-decoration:none">Terms</a>
+      </div>
+    </div>
+
+    <!-- RIGHT: Visual preview -->
+    <aside class="right" aria-hidden="false">
+      <div class="preview" role="img" aria-label="Preview of users">
+        <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Preview user 1">
+        <img src="https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Preview user 2" style="width:86px;height:86px;border-radius:12px">
+        <img src="https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Preview user 3" style="width:86px;height:86px;border-radius:12px">
+      </div>
+      <div style="width:100%; text-align:center; margin-top:6px;">
+        <div style="font-size:13px;color:var(--muted)">Instant pairing • Try now</div>
+      </div>
+
+      <div style="width:100%; margin-top:16px;">
+        <div style="display:flex; gap:8px; justify-content:center; align-items:center;">
+          <div class="pill">Secure</div>
+          <div class="pill">Fast</div>
+          <div class="pill">Verified</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Gender modal overlay -->
+  <div class="overlay" id="genderOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="genderTitle">
+    <div class="gender-card" role="document">
+      <div class="modal-head">
+        <div>
+          <h3 id="genderTitle">Choose your gender</h3>
+          <div class="modal-desc">Pick the option that best fits — this helps us match you. You'll then be redirected to CooMeet to start chatting.</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost" id="closeOverlay" aria-label="Close gender selection">✕</button>
+        </div>
+      </div>
+
+      <div class="genders" role="list">
+        <div class="gender-tile" role="listitem" tabindex="0" data-gender="male" aria-label="Male">
+          <!-- Male SVG icon -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="7" r="3.2" fill="url(#maleGrad)"></circle>
+            <path d="M8 14c0-2 4-3.5 4-3.5s4 1.5 4 3.5v3H8v-3z" fill="rgba(255,255,255,0.06)"></path>
+            <defs>
+              <linearGradient id="maleGrad" x1="0" x2="1">
+                <stop offset="0" stop-color="#6ec6ff"/>
+                <stop offset="1" stop-color="#3aa0ff"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div style="font-size:13px;color:var(--muted)">I'm a</div>
+          <div class="gender-label">Male</div>
+        </div>
+
+        <div class="gender-tile" role="listitem" tabindex="0" data-gender="female" aria-label="Female">
+          <!-- Female SVG icon -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="7" r="3.2" fill="url(#fGrad)"></circle>
+            <path d="M9 14c0-2 3.5-3 3.5-3S16 12 16 14v3H9v-3z" fill="rgba(255,255,255,0.06)"></path>
+            <defs>
+              <linearGradient id="fGrad" x1="0" x2="1">
+                <stop offset="0" stop-color="#ff9ad0"/>
+                <stop offset="1" stop-color="#ff6aa3"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div style="font-size:13px;color:var(--muted)">I'm a</div>
+          <div class="gender-label">Female</div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <div class="muted">By continuing you agree to be redirected to CooMeet's website.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**********************
+     * Referral settings:
+     * Users land on coomeet.com while your affiliate id is attached as a parameter.
+     * This keeps the user on coomeet.com but still passes your affiliate ID.
+     **********************/
+    const AFFILIATE_ID = '17581048734957';
+    const COOMEET_TARGET = 'https://coomeet.com/?a=' + encodeURIComponent(AFFILIATE_ID);
+
+    /* Elements */
+    const getTrialBtn = document.getElementById('getTrial');
+    const alreadyBtn = document.getElementById('alreadyCustomer');
+    const privacyBtn = document.getElementById('privacyBtn');
+    const overlay = document.getElementById('genderOverlay');
+    const closeOverlay = document.getElementById('closeOverlay');
+    const genderTiles = Array.from(document.querySelectorAll('.gender-tile'));
+
+    /* Utility: redirect to coomeet with your affiliate id */
+    function redirectToCoomeet(gender){
+      // optionally add gender tracking param if you want:
+      // const url = COOMEET_TARGET + '&gender=' + encodeURIComponent(gender);
+      const url = COOMEET_TARGET;
+      // show a tiny toast then redirect
+      try {
+        const toast = document.createElement('div');
+        toast.textContent = 'Redirecting to CooMeet...';
+        Object.assign(toast.style, {
+          position:'fixed', bottom:'28px', left:'50%', transform:'translateX(-50%)',
+          background:'rgba(0,0,0,0.6)', padding:'10px 16px', borderRadius:'10px', color:'#fff',
+          zIndex:2000, fontSize:'13px'
+        });
+        document.body.appendChild(toast);
+        setTimeout(()=> {
+          document.body.removeChild(toast);
+          // use location.href so user lands on coomeet.com (same tab)
+          window.location.href = url;
+        }, 600);
+      } catch(e){
+        window.location.href = url;
+      }
+    }
+
+    /* Open gender overlay */
+    function openOverlay(){
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden','false');
+      setTimeout(()=> {
+        const first = document.querySelector('.gender-tile');
+        if(first) first.focus();
+      }, 160);
+    }
+
+    /* Close overlay */
+    function closeOverlayFunc(){
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+    }
+
+    /* Hook UI */
+    getTrialBtn.addEventListener('click', openOverlay);
+    alreadyBtn.addEventListener('click', () => {
+      // Send user to CooMeet (with affiliate id attached)
+      redirectToCoomeet('signin');
+    });
+    privacyBtn.addEventListener('click', () => {
+      window.location.hash = '#privacy';
+      privacyBtn.animate([{ transform:'translateY(0)' }, { transform:'translateY(-4px)' }, { transform:'translateY(0)' }], { duration:250 });
+    });
+
+    closeOverlay.addEventListener('click', closeOverlayFunc);
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay) closeOverlayFunc();
+    });
+
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape') closeOverlayFunc();
+    });
+
+    // Gender tile clicks & keyboard activation
+    genderTiles.forEach(tile => {
+      const gender = tile.dataset.gender || '';
+      tile.addEventListener('click', () => {
+        tile.animate([{ transform:'scale(1)' }, { transform:'scale(.98)' }, { transform:'scale(1)' }], { duration:160 });
+        setTimeout(()=> redirectToCoomeet(gender), 200);
+      });
+
+      tile.addEventListener('keydown', (ev) => {
+        if(ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          tile.click();
+        }
+      });
+    });
+
+    // Accessibility overlay observer
+    const observer = new MutationObserver(() => {
+      if(overlay.classList.contains('show')) overlay.setAttribute('aria-hidden','false');
+      else overlay.setAttribute('aria-hidden','true');
+    });
+    observer.observe(overlay, { attributes:true, attributeFilter:['class'] });
+
+    // Defensive: log affiliate id present
+    if(!AFFILIATE_ID) console.warn('Affiliate ID missing; set AFFILIATE_ID in script.');
+  </script>
+</body>
+</html>
