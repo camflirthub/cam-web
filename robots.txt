@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://camflirthub.github.io/cam-web/sitemap.xml
